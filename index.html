@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ficha de trabajo · Trading y criptomonedas</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #eef3f8; color: #17283b;
+    font: 1rem/1.55 system-ui, sans-serif; }
+  main { width: min(900px, 94%); margin: 2rem auto; }
+  header, section { padding: clamp(1rem, 4vw, 2rem); border-radius: 14px; }
+  header { background: #132c46; color: white; }
+  header p, header h1 { margin: .25rem 0; }
+  header p:first-child { color: #a6e4df; }
+  nav { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+  button { font: inherit; font-weight: 650; cursor: pointer; padding: .65rem .9rem;
+    border: 1px solid #647b91; border-radius: 8px; background: white; color: #132c46; }
+  button[aria-selected="true"], button[type="submit"] {
+    background: #075b57; border-color: #075b57; color: white; }
+  :focus-visible { outline: 3px solid #a44600; outline-offset: 3px; }
+  section { background: white; border: 1px solid #c8d5e2; }
+  h2 { margin: 0 0 .5rem; }
+  .pregunta { margin: 1.3rem 0; }
+  label { display: block; margin-bottom: .4rem; }
+  label strong { display: block; color: #075b57; margin-bottom: .2rem; }
+  textarea, input { display: block; width: 100%; padding: .65rem;
+    border: 1px solid #647b91; border-radius: 7px; font: inherit;
+    color: inherit; background: #fbfdff; }
+  textarea { min-height: 7rem; resize: vertical; }
+  input { max-width: 32rem; margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p>Educación financiera y consumo responsable · 4.º de ESO</p>
+    <h1>Trading y criptomonedas</h1>
+    <p>Lee el manual y los dos casos. Responde con tus palabras y descarga el PDF antes de cerrar la ficha.</p>
+  </header>
+  <nav id="pestanas" role="tablist" aria-label="Apartados de la ficha"></nav>
+  <div id="paneles"></div>
+</main>
+
+<script>
+"use strict";
+
+const apartados = [
+  {
+    titulo: "Antes de empezar",
+    intro: "Responde después de leer el manual. Explica las ideas con tus propias palabras.",
+    preguntas: [
+      ["Bolsa y trading de criptoactivos (p. 3)",
+       "Según la tabla del manual, ¿en qué se diferencian la inversión en bolsa convencional y el trading de criptoactivos en cuanto al plazo de las operaciones y la volatilidad?"],
+      ["Qué atrae del trading (p. 4)",
+       "¿Qué significa FOMO y cómo pueden las redes sociales provocar esa sensación en alguien que está pensando en invertir?"],
+      ["Modalidades de trading (p. 6)",
+       "¿En qué consiste el copy trading y por qué copiar automáticamente las operaciones de un trader popular puede dar una falsa sensación de seguridad?"]
+    ]
+  },
+  {
+    titulo: "Operación Momia",
+    intro: "Lee el caso de Miguel. Apoya tus respuestas en detalles concretos del cómic o del resumen.",
+    preguntas: [
+      ["Campaña ficticia: detectad el engaño",
+       "Preparad en grupo un cartel, un anuncio para redes y el guion de un vídeo corto para una inversión ficticia. Anotad aquí los mensajes de las tres piezas. Incluid una promesa de rentabilidad garantizada y un testimonio inventado, y explicad cómo se podría detectar cada engaño. Es una simulación de aula: no publiquéis la campaña."],
+      ["Mitos frente a realidad",
+       "Elegid un mito sobre inversión o criptomonedas, por ejemplo, la promesa de convertir 10 € en 1.000 € en 48 horas del caso. ¿Qué evidencia y qué ejemplo real usaríais para cuestionarlo? Indicad la fuente y explicad qué demuestra."],
+      ["Debate: ¿es todo lo que brilla oro?",
+       "Preparad al menos cuatro argumentos para vuestra postura en el debate sobre la ética y la legalidad de las ofertas que prometen rendimientos extraordinarios en poco tiempo. Después del debate, resumid las señales de alerta que habéis identificado."],
+      ["Historias de horror financiero",
+       "Redactad un relato breve basado en una estafa financiera real. Indicad la fuente, explicad qué facilitó el engaño, qué consecuencias tuvo y qué medidas podrían haber ayudado a evitarlo."]
+    ]
+  },
+  {
+    titulo: "Operación Wal-E",
+    intro: "Lee el caso de Paola. Distingue entre lo que el caso confirma y lo que solo podemos suponer.",
+    preguntas: [
+      ["Informe sobre el caso",
+       "Explica qué papel tuvieron el enlace y el formulario de la oferta de 10 €. ¿Qué errores pudieron facilitar el robo de fondos y qué medidas preventivas podría haber tomado Paola?"],
+      ["Guía de seguridad",
+       "Diseña una infografía para proteger una cuenta de criptomonedas. Escribe aquí sus recomendaciones sobre cómo verificar enlaces y formularios, usar contraseñas seguras y autenticación en dos pasos, y reconocer y evitar el phishing."],
+      ["El relato de Paola",
+       "Escribe en primera persona, como si fueras Paola. Cuenta cómo descubriste el robo, qué aprendiste sobre la protección de tus datos y qué consejos darías a otras personas."],
+      ["Simulación de fraude en el aula",
+       "Tras la simulación, anota qué señales de alerta detectaste, cómo respondiste, qué sentiste y qué harías en una situación real. Durante la simulación no uséis enlaces activos ni datos personales reales."]
+    ]
+  }
+];
+
+const $ = id => document.getElementById(id);
+function crear(etiqueta, texto) {
+  const nodo = document.createElement(etiqueta);
+  if (texto !== undefined) nodo.textContent = texto;
+  return nodo;
+}
+
+const titulos = [...apartados.map(a => a.titulo), "descarga tu trabajo"];
+const paneles = [];
+const pestanas = [];
+const campos = [];
+
+titulos.forEach((titulo, i) => {
+  const pestana = crear("button", titulo);
+  pestana.type = "button";
+  pestana.id = `tab-${i}`;
+  pestana.setAttribute("role", "tab");
+  pestana.setAttribute("aria-controls", `panel-${i}`);
+  pestana.addEventListener("click", () => activar(i));
+  pestana.addEventListener("keydown", e => {
+    let destino;
+    if (e.key === "ArrowRight") destino = (i + 1) % titulos.length;
+    else if (e.key === "ArrowLeft") destino = (i + titulos.length - 1) % titulos.length;
+    else if (e.key === "Home") destino = 0;
+    else if (e.key === "End") destino = titulos.length - 1;
+    else return;
+    e.preventDefault();
+    activar(destino);
+    pestanas[destino].focus();
+  });
+  $("pestanas").append(pestana);
+  pestanas.push(pestana);
+
+  const panel = crear("section");
+  panel.id = `panel-${i}`;
+  panel.hidden = true;
+  panel.setAttribute("role", "tabpanel");
+  panel.setAttribute("aria-labelledby", pestana.id);
+  $("paneles").append(panel);
+  paneles.push(panel);
+
+  const apartado = apartados[i];
+  if (!apartado) {
+    const form = crear("form");
+    form.id = "entrega";
+    const etiqueta = crear("label", "Nombre y apellidos");
+    etiqueta.htmlFor = "nombre";
+    const nombre = crear("input");
+    nombre.id = "nombre";
+    nombre.required = true;
+    nombre.maxLength = 100;
+    nombre.autocomplete = "name";
+    const boton = crear("button", "Descargar respuestas en PDF");
+    boton.type = "submit";
+    form.append(etiqueta, nombre, boton);
+    panel.append(form);
+    return;
+  }
+  panel.append(crear("h2", titulo), crear("p", apartado.intro));
+  campos[i] = apartado.preguntas.map(([tema, pregunta], j) => {
+    const bloque = crear("div");
+    bloque.className = "pregunta";
+    const etiqueta = crear("label");
+    const tituloPregunta = `${j + 1}. ${tema}`;
+    const respuesta = crear("textarea");
+    respuesta.id = `respuesta-${i}-${j}`;
+    etiqueta.htmlFor = respuesta.id;
+    etiqueta.append(crear("strong", tituloPregunta), document.createTextNode(pregunta));
+    bloque.append(etiqueta, respuesta);
+    panel.append(bloque);
+    return { tituloPregunta, pregunta, respuesta };
+  });
+});
+
+function activar(indice) {
+  pestanas.forEach((pestana, i) => {
+    const seleccionada = i === indice;
+    pestana.tabIndex = seleccionada ? 0 : -1;
+    pestana.setAttribute("aria-selected", String(seleccionada));
+    paneles[i].hidden = !seleccionada;
+  });
+}
+activar(0);
+
+// PDF de texto A4 generado localmente con fuentes estándar.
+const win1252 = "€\0‚ƒ„…†‡ˆ‰Š‹Œ\0Ž\0\0‘’“”•–—˜™š›œ\0žŸ";
+function textoPDF(texto) {
+  return Array.from(texto.normalize("NFC"), c => {
+    const n = c.codePointAt(0);
+    if (n >= 32 && n <= 126) return "\\()".includes(c) ? "\\" + c : c;
+    const i = win1252.indexOf(c);
+    const byte = n >= 160 && n <= 255 ? n : i >= 0 && n !== 0 ? i + 128 : 63;
+    return "\\" + byte.toString(8).padStart(3, "0");
+  }).join("");
+}
+
+function generarPDF(nombre) {
+  const paginas = [[]];
+  const canvas = document.createElement("canvas").getContext("2d");
+  let y = 790;
+  function nuevaPagina() { paginas.push([]); y = 790; }
+
+  function ajustar(texto, tam, negrita) {
+    canvas.font = `${negrita ? "bold " : ""}${tam}px Arial, sans-serif`;
+    const cabe = linea => canvas.measureText(linea).width <= 480;
+    return texto.split(/\r?\n/).flatMap(parrafo => {
+      const lineas = [];
+      let linea = "";
+      for (const palabra of parrafo.trim().split(/\s+/)) {
+        const candidata = linea ? linea + " " + palabra : palabra;
+        if (cabe(candidata)) {
+          linea = candidata;
+        } else {
+          if (linea) lineas.push(linea);
+          linea = "";
+          for (const letra of palabra) {
+            if (linea && !cabe(linea + letra)) {
+              lineas.push(linea);
+              linea = "";
+            }
+            linea += letra;
+          }
+        }
+      }
+      return [...lineas, linea];
+    });
+  }
+
+  function escribir(texto, tam = 11, negrita = false, espacio = 6) {
+    for (const linea of ajustar(texto, tam, negrita)) {
+      if (y < 55) nuevaPagina();
+      paginas[paginas.length - 1].push(
+        `BT /${negrita ? "B" : "R"} ${tam} Tf 1 0 0 1 54 ${y} Tm (${textoPDF(linea)}) Tj ET\n`
+      );
+      y -= tam + 4;
+    }
+    y -= espacio;
+  }
+
+  escribir("Ficha de trabajo: Trading y criptomonedas", 18, true);
+  escribir(`Nombre y apellidos: ${nombre}`, 12, false, 16);
+  apartados.forEach((apartado, i) => {
+    if (y < 180) nuevaPagina();
+    escribir(apartado.titulo, 15, true, 8);
+    campos[i].forEach(({tituloPregunta, pregunta, respuesta}) => {
+      const alto = ajustar(tituloPregunta, 11, true).length * 15 +
+                   ajustar(pregunta, 10, false).length * 14;
+      if (y < 80 + alto) nuevaPagina();
+      escribir(tituloPregunta, 11, true, 2);
+      escribir(pregunta, 10, false, 4);
+      escribir(respuesta.value.trim() || "Sin responder", 11, false, 12);
+    });
+  });
+
+  const objetos = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    `<< /Type /Pages /Count ${paginas.length} /Kids [${paginas.map((_, i) => `${5 + 2*i} 0 R`).join(" ")}] >>`,
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>"
+  ];
+  paginas.forEach((lineas, i) => {
+    const pie = textoPDF(`Página ${i + 1} de ${paginas.length}`);
+    const contenido = lineas.join("") + `BT /R 9 Tf 1 0 0 1 54 30 Tm (${pie}) Tj ET\n`;
+    objetos.push(
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /R 3 0 R /B 4 0 R >> >> /Contents ${6 + 2*i} 0 R >>`,
+      `<< /Length ${contenido.length} >>\nstream\n${contenido}endstream`
+    );
+  });
+  let pdf = "%PDF-1.4\n";
+  const posiciones = [];
+  objetos.forEach((objeto, i) => {
+    posiciones.push(pdf.length);
+    pdf += `${i + 1} 0 obj\n${objeto}\nendobj\n`;
+  });
+  const xref = pdf.length;
+  pdf += `xref\n0 ${objetos.length + 1}\n0000000000 65535 f \n`;
+  posiciones.forEach(p => { pdf += `${String(p).padStart(10, "0")} 00000 n \n`; });
+  pdf += `trailer\n<< /Size ${objetos.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return new Blob([pdf], {type: "application/pdf"});
+}
+
+$("nombre").addEventListener("input", () => $("nombre").setCustomValidity(""));
+$("entrega").addEventListener("submit", e => {
+  e.preventDefault();
+  const nombre = $("nombre").value.trim();
+  if (!nombre) {
+    $("nombre").setCustomValidity("Escribe tu nombre y apellidos.");
+    $("nombre").reportValidity();
+    return;
+  }
+  const enlace = crear("a");
+  const url = URL.createObjectURL(generarPDF(nombre));
+  const sufijo = nombre.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "");
+  enlace.href = url;
+  enlace.download = `Ficha-trading-${sufijo || "entrega"}.pdf`;
+  document.body.append(enlace);
+  enlace.click();
+  enlace.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+});
+</script>
+</body>
+</html>
